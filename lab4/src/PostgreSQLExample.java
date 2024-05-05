@@ -1,5 +1,7 @@
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.Statement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class PostgreSQLExample {
@@ -9,33 +11,30 @@ public class PostgreSQLExample {
         String username = "postgres";
         String password = "snapSh00t!";
 
-
             // Register the PostgreSQL driver
 
             Class.forName("org.postgresql.Driver");
 
             // Connect to the database
-
             Connection connection = DriverManager.getConnection(jdbcUrl, username, password);
-            System.out.println("Connection" + connection + " has been connected.");
+
+            //Test if connection has been made
+            //System.out.println("Connection" + connection + " has been connected.");
 
             // Perform desired database operations
 
-            //create TABLE
-            // (Connection connection = DriverManager.getConnection(jdbcUrl, username, password)) {
-            //     Statement statement = connection.createStatement();
-    
-            //     String createTableSQL = "CREATE TABLE employees ("
-            //             + "id serial PRIMARY KEY,"
-            //             + "name VARCHAR(255),"
-            //             + "age INT)";
-    
-            //     statement.execute(createTableSQL);
-    
-            //     System.out.println("Table created successfully.");
-            // }
+            //Print all values from Bus Table
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery("SELECT * FROM Bus");
+            
+            while (resultSet.next()) {
+                // String columnValue = resultSet.getString("BusID");
+                System.out.printf("id: %d model: %s year: %d \n", resultSet.getLong("busid"), resultSet.getString("model"), resultSet.getLong("year"));
+            }
 
             // Close the connection
+            statement.close();
+            resultSet.close();
             connection.close();
         }
 }
