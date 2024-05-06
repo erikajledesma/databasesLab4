@@ -1,8 +1,4 @@
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.Statement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.Scanner;
 
 public class PostgreSQLExample {
@@ -28,12 +24,60 @@ public class PostgreSQLExample {
             //Main Menu
             System.out.println("--- POMONA TRANSIT SYSTEM ---");
             System.out.println("1: Display schedule for a trip");
+            System.out.println("2: Edit Trip Offerings");
             System.out.println("0: Exit the menu");
 
             //get user's menu choice
             Scanner scn = new Scanner(System.in);
             System.out.println("Choose a number from the menu: ");
             int menu_choice = scn.nextInt();
+
+            if(menu_choice ==2){
+                System.out.println("--CHOOSE HOW TO EDIT--");
+                System.out.println("1: Add trip ");
+                int edit_choice = scn.nextInt();
+                if(edit_choice == 1){
+                    while (true) {
+                        System.out.println("--ADD A TRIP--");
+                        System.out.println("Please enter the trip number: ");
+                        int tripNum = scn.nextInt();
+                        scn.nextLine();
+                        System.out.println("Please enter the trip date in YYYY-MM-DD format: ");
+                        String tripDate = scn.nextLine();
+                        System.out.println("Please enter the scheduled start time in HH:MM::SS format: ");
+                        String startTime = scn.nextLine();
+                        System.out.println("Please enter the scheduled arrival time in HH:MM::SS format: ");
+                        String arrivalTime = scn.nextLine();
+                        System.out.println("Please enter the bus driver name: ");
+                        String driverName = scn.nextLine();
+                        System.out.println("Please enter the busID: ");
+                        int busID = scn.nextInt();
+                        try{
+                        PreparedStatement statement = connection.prepareStatement(
+                                "INSERT INTO tripoffering (tripnumber, date, scheduledstarttime, scheduledarrivaltime, drivername, busid) VALUES(?,?,?,?,?,?)");
+                        statement.setInt(1, tripNum);
+                        statement.setDate(2, java.sql.Date.valueOf(tripDate));
+                        statement.setTime(3, java.sql.Time.valueOf(startTime));
+                        statement.setTime(4, java.sql.Time.valueOf(arrivalTime));
+                        statement.setString(5, driverName);
+                        statement.setInt(6, busID);
+                        statement.executeUpdate();
+                            System.out.println("Trip successfully added.");
+                        } catch (SQLException ex) {
+                            System.out.println("The trip could not be added: ");
+                            System.out.println(ex.getMessage());
+                        }
+                        System.out.println("Would you like to add another trip?");
+                        System.out.println("1: Add another trip");
+                        System.out.println("2: Exit back to menu");
+                        int add_choice = scn.nextInt();
+                        if (add_choice == 2){
+                            break;
+                        }
+                    }
+
+                }
+            }
 
             if (menu_choice == 1){
                 //Display schedule of all trips for a given StartLocationName and DestinationName, and Date
