@@ -25,12 +25,33 @@ public class PostgreSQLExample {
             System.out.println("--- POMONA TRANSIT SYSTEM ---");
             System.out.println("1: Display schedule for a trip");
             System.out.println("2: Edit Trip Offerings");
+            System.out.println("5: Add a driver");
+            System.out.println("6: Add a bus");
+            System.out.println("7: Delete a bus");
             System.out.println("0: Exit the menu");
 
             //get user's menu choice
             Scanner scn = new Scanner(System.in);
             System.out.println("Choose a number from the menu: ");
             int menu_choice = scn.nextInt();
+            scn.nextLine();
+            if (menu_choice ==7) {
+                System.out.println("--DELETE A BUS--");
+                System.out.println("Please enter the bus ID to be deleted: ");
+                int busID = scn.nextInt();
+                scn.nextLine();
+                try {
+                    Statement check = connection.createStatement();
+                    ResultSet resultSet = check.executeQuery("SELECT * from bus WHERE busID ="+busID);
+                    if (resultSet.next()){
+                        PreparedStatement statement = connection.prepareStatement(
+                                "DELETE FROM bus WHERE busid=?");
+                        statement.setInt(1, busID);
+                        statement.executeUpdate();
+                        System.out.println("Bus successfully deleted.");
+                    } else {
+                        System.out.println("Bus does not exist.");
+                    }
 
             if(menu_choice ==2){
                 System.out.println("--CHOOSE HOW TO EDIT--");
@@ -44,24 +65,24 @@ public class PostgreSQLExample {
                         scn.nextLine();
                         System.out.println("Please enter the trip date in YYYY-MM-DD format: ");
                         String tripDate = scn.nextLine();
-                        System.out.println("Please enter the scheduled start time in HH:MM::SS format: ");
+                        System.out.println("Please enter the scheduled start time in HH:MM:SS format: ");
                         String startTime = scn.nextLine();
-                        System.out.println("Please enter the scheduled arrival time in HH:MM::SS format: ");
+                        System.out.println("Please enter the scheduled arrival time in HH:MM:SS format: ");
                         String arrivalTime = scn.nextLine();
                         System.out.println("Please enter the bus driver name: ");
                         String driverName = scn.nextLine();
                         System.out.println("Please enter the busID: ");
                         int busID = scn.nextInt();
-                        try{
-                        PreparedStatement statement = connection.prepareStatement(
-                                "INSERT INTO tripoffering (tripnumber, date, scheduledstarttime, scheduledarrivaltime, drivername, busid) VALUES(?,?,?,?,?,?)");
-                        statement.setInt(1, tripNum);
-                        statement.setDate(2, java.sql.Date.valueOf(tripDate));
-                        statement.setTime(3, java.sql.Time.valueOf(startTime));
-                        statement.setTime(4, java.sql.Time.valueOf(arrivalTime));
-                        statement.setString(5, driverName);
-                        statement.setInt(6, busID);
-                        statement.executeUpdate();
+                        try {
+                            PreparedStatement statement = connection.prepareStatement(
+                                    "INSERT INTO tripoffering (tripnumber, date, scheduledstarttime, scheduledarrivaltime, drivername, busid) VALUES(?,?,?,?,?,?)");
+                            statement.setInt(1, tripNum);
+                            statement.setDate(2, java.sql.Date.valueOf(tripDate));
+                            statement.setTime(3, java.sql.Time.valueOf(startTime));
+                            statement.setTime(4, java.sql.Time.valueOf(arrivalTime));
+                            statement.setString(5, driverName);
+                            statement.setInt(6, busID);
+                            statement.executeUpdate();
                             System.out.println("Trip successfully added.");
                         } catch (SQLException ex) {
                             System.out.println("The trip could not be added: ");
@@ -71,13 +92,93 @@ public class PostgreSQLExample {
                         System.out.println("1: Add another trip");
                         System.out.println("2: Exit back to menu");
                         int add_choice = scn.nextInt();
-                        if (add_choice == 2){
+                        if (add_choice == 2) {
                             break;
                         }
                     }
+                    } else if (edit_choice == 2){
+                        System.out.println("--DELETE A TRIP--");
+                        System.out.println("Please enter the trip number: ");
+                        int tripNum = scn.nextInt();
+                        scn.nextLine();
+                        System.out.println("Please enter the trip date in YYYY-MM-DD format: ");
+                        String tripDate = scn.nextLine();
+                        System.out.println("Please enter the scheduled start time in HH:MM:SS format: ");
+                        String startTime = scn.nextLine();
+                        PreparedStatement check = connection.prepareStatement(
+                                "SELECT * FROM tripoffering WHERE tripnumber=? AND date=? AND scheduledstarttime=?");
+                        check.setInt(1, tripNum);
+                        check.setDate(2, java.sql.Date.valueOf(tripDate));
+                        check.setTime(3, java.sql.Time.valueOf(startTime));
+                        ResultSet result = check.executeQuery();
+                        if (result.next()){
+                            try{
+                                PreparedStatement statement = connection.prepareStatement(
+                                        "DELETE FROM tripoffering WHERE tripnumber=? AND date=? AND scheduledstarttime=?");
+                                statement.setInt(1, tripNum);
+                                statement.setDate(2, java.sql.Date.valueOf(tripDate));
+                                statement.setTime(3, java.sql.Time.valueOf(startTime));
+                                statement.executeUpdate();
+                                System.out.println("Trip successfully deleted.");
+                            } catch (SQLException ex) {
+                                System.out.println("The trip could not be deleted: ");
+                                System.out.println(ex.getMessage());
+                            }
+                        } else {
+                            System.out.println("The trip does not exist.");
+                        }
+                    } else if (edit_choice == 3){
+                        System.out.println("--EDIT DRIVER--");
+                        System.out.println("Please enter the trip number of the trip you want to edit: ");
+                        int tripNum = scn.nextInt();
+                        scn.nextLine();
+                        System.out.println("Please enter the trip date in YYYY-MM-DD format: ");
+                        String tripDate = scn.nextLine();
+                        System.out.println("Please enter the scheduled start time in HH:MM:SS format: ");
+                        String startTime = scn.nextLine();
+                        System.out.println("Please enter the new driver name for the trip: ");
+                        String newDriverName = scn.nextLine();
+                        try {
+                            PreparedStatement statement = connection.prepareStatement(
+                                    "UPDATE tripoffering SET drivername=? WHERE tripnumber=? AND date=? AND scheduledstarttime=?");
+                            statement.setString(1, newDriverName);
+                            statement.setInt(2, tripNum);
+                            statement.setDate(3, java.sql.Date.valueOf(tripDate));
+                            statement.setTime(4, java.sql.Time.valueOf(startTime));
+                            statement.executeUpdate();
+                            System.out.println("Trip successfully updated with new driver.");
+                        } catch (SQLException ex) {
+                            System.out.println("The trip could not be updated: ");
+                            System.out.println(ex.getMessage());
+                        }
+                } else if (edit_choice == 4){
+                    System.out.println("--EDIT BUS--");
+                    System.out.println("Please enter the trip number of the trip you want to edit: ");
+                    int tripNum = scn.nextInt();
+                    scn.nextLine();
+                    System.out.println("Please enter the trip date in YYYY-MM-DD format: ");
+                    String tripDate = scn.nextLine();
+                    System.out.println("Please enter the scheduled start time in HH:MM:SS format: ");
+                    String startTime = scn.nextLine();
+                    System.out.println("Please enter the new bus ID for the trip: ");
+                    int newBusID = scn.nextInt();
+                    try {
+                        PreparedStatement statement = connection.prepareStatement(
+                                "UPDATE tripoffering SET busid=? WHERE tripnumber=? AND date=? AND scheduledstarttime=?");
+                        statement.setInt(1, newBusID);
+                        statement.setInt(2, tripNum);
+                        statement.setDate(3, java.sql.Date.valueOf(tripDate));
+                        statement.setTime(4, java.sql.Time.valueOf(startTime));
+                        statement.executeUpdate();
+                        System.out.println("Trip successfully updated with new bus ID.");
+                    } catch (SQLException ex) {
+                        System.out.println("The trip could not be updated: ");
+                        System.out.println(ex.getMessage());
+                    }
+                }
 
                 }
-            }
+
 
             if (menu_choice == 1){
                 //Display schedule of all trips for a given StartLocationName and DestinationName, and Date
