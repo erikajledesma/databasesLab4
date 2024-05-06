@@ -40,22 +40,40 @@ public class PostgreSQLExample {
             if (menu_choice == 1){
                 //Display schedule of all trips for a given StartLocationName and DestinationName, and Date
                 Scanner scn1 = new Scanner(System.in);
-                System.out.println("Select your start --> end destination: ");
-                System.out.println("1: City A --> City B");
-                System.out.println("2: City B --> City C");
-                System.out.println("3: Sin City --> Cos City");
-                System.out.println("4: Havenbrook --> Willow Springs");
-                System.out.println("5: Brooksville --> Clearwater");
+                System.out.println("Enter your start destination: ");
+                Statement start_options = connection.createStatement();
+                ResultSet start_set = start_options.executeQuery("SELECT StartLocationName, DestinationName FROM Trip");
+                
+                while (start_set.next()) {
+                    System.out.println(start_set.getString("startlocationname"));
+                    System.out.println(start_set.getString("destinationname"));
+                }
 
-                int tripNum = scn1.nextInt();
+                String startLocation = scn1.nextLine();
+
+                System.out.println("Enter your end destination: ");
+                Statement destination_options = connection.createStatement();
+                ResultSet destination_set = destination_options.executeQuery("SELECT StartLocationName, DestinationName FROM Trip");
+                
+                while (destination_set.next()) {
+                    System.out.println(destination_set.getString("startlocationname"));
+                    System.out.println(destination_set.getString("destinationname"));
+                }
+
+                String endLocation = scn1.nextLine();
+
+                System.out.println("Enter the date of your trip in YYYY-MM-DD format: ");
+
+                String tripDate = scn1.nextLine();
+
                 Statement statement = connection.createStatement();
-                ResultSet resultSet = statement.executeQuery("SELECT Date, ScheduledStartTime, ScheduledArrivalTime, DriverName, BusID FROM TripOffering WHERE tripnumber=" + tripNum);
+                ResultSet resultSet = statement.executeQuery("SELECT T1.ScheduledStartTime, T1.ScheduledArrivalTime, T1.DriverName, T1.BusID FROM TripOffering T1, Trip T2 WHERE T1.TripNumber = T2.TripNumber AND T2.StartLocationName = '" + startLocation + "' AND T2.DestinationName = '" + endLocation + "' AND T1.Date = '" + tripDate +"'");
 
                 System.out.printf("----------------------------------------------------------------------------------%n");
-                System.out.printf("| %-10s | %-8s | %-8s | %-15s | %-8s | %n", "Date", "Scheduled Start Time", "Scheduled Arrival Time", "Driver Name", "BusID");
+                System.out.printf("| %-10s | %-8s | %-15s | %-8s | %n", "Scheduled Start Time", "Scheduled Arrival Time", "Driver Name", "BusID");
                 // System.out.println("Date           Scheduled Start Time      Scheduled Arrival Time      Driver Name        BusID");
                 while (resultSet.next()) {
-                    System.out.printf("| %-10s | %-20s | %-22s | %-11s | %-8s | %n", resultSet.getDate("Date"), resultSet.getTime("ScheduledStartTime"), resultSet.getTime("ScheduledArrivalTime"), resultSet.getString("DriverName"), resultSet.getLong("BusID"));
+                    System.out.printf("| %-10s | %-22s | %-11s | %-8s | %n", resultSet.getTime("ScheduledStartTime"), resultSet.getTime("ScheduledArrivalTime"), resultSet.getString("DriverName"), resultSet.getLong("BusID"));
                 }
                 System.out.printf("----------------------------------------------------------------------------------%n");
 
@@ -66,17 +84,31 @@ public class PostgreSQLExample {
             if (menu_choice == 3){
                 //Display all stops for a given trip
                 Scanner scn3 = new Scanner(System.in);
-                System.out.println("Select your start --> end destination to see the stops for this trip: ");
-                System.out.println("1: City A --> City B");
-                System.out.println("2: City B --> City C");
-                System.out.println("3: Sin City --> Cos City");
-                System.out.println("4: Havenbrook --> Willow Springs");
-                System.out.println("5: Brooksville --> Clearwater");
+        
+                System.out.println("Enter your start destination: ");
+                Statement start_options = connection.createStatement();
+                ResultSet start_set = start_options.executeQuery("SELECT StartLocationName, DestinationName FROM Trip");
+                
+                while (start_set.next()) {
+                    System.out.println(start_set.getString("startlocationname"));
+                    System.out.println(start_set.getString("destinationname"));
+                }
 
-                int tripNum = scn3.nextInt();
+                String startLocation = scn3.nextLine();
+
+                System.out.println("Enter your end destination: ");
+                Statement destination_options = connection.createStatement();
+                ResultSet destination_set = destination_options.executeQuery("SELECT StartLocationName, DestinationName FROM Trip");
+                
+                while (destination_set.next()) {
+                    System.out.println(destination_set.getString("startlocationname"));
+                    System.out.println(destination_set.getString("destinationname"));
+                }
+               
+                String endLocation = scn3.nextLine();
 
                 Statement statement = connection.createStatement();
-                ResultSet resultSet = statement.executeQuery("SELECT S1.StopNumber, S2.StopAddress FROM TripStopInfo S1, Stop S2 WHERE S1.StopNumber = S2.StopNumber AND S1.TripNumber = " + tripNum);
+                ResultSet resultSet = statement.executeQuery("SELECT S1.StopNumber, S2.StopAddress FROM TripStopInfo S1, Stop S2, Trip S3 WHERE S1.StopNumber = S2.StopNumber AND S1.TripNumber = S3.TripNumber AND S3.StartLocationName = '" + startLocation + "' AND S3.DestinationName = '" + endLocation + "'");
 
                 System.out.printf("----------------------------------------------------------------------------------%n");
                 System.out.printf("| %-10s | %-8s | %n", "Stop Number", "Stop Address");
@@ -92,10 +124,12 @@ public class PostgreSQLExample {
             if (menu_choice == 4){
                 System.out.println("Enter the name of the driver whose schedule you would like to view: ");
                 Scanner scn4 = new Scanner(System.in);
-                System.out.println("John Doe");
-                System.out.println("Jane Smith");
-                System.out.println("Anthony Orlando");
-                System.out.println("Jungkook Jeon");
+                Statement driver_options = connection.createStatement();
+                ResultSet driver_set = driver_options.executeQuery("SELECT DriverName FROM Driver");
+                
+                while (driver_set.next()) {
+                    System.out.println(driver_set.getString("drivername"));
+                }
 
                 String driverName = scn4.nextLine();
 
